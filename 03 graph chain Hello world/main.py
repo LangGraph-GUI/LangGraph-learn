@@ -4,6 +4,9 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
+import json
+
+
 # Specify the local language model
 local_llm = "phi3"
 
@@ -25,9 +28,16 @@ def Agent(question):
     
     return generation
 
+
 def Tool(input):
+    # Parse the JSON input
+    data = json.loads(input)
+    # Extract the "answer" part
+    answer = data.get("answer", "")
+    # Write the answer to output.txt
     with open('output.txt', 'w') as file:
-        file.write(input)
+        file.write(answer)
+
     return input
 
 
