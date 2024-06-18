@@ -3,18 +3,8 @@
 [Learn LangGraph - The Easy Way](https://www.youtube.com/watch?v=R8KB-Zcynxc)
 
 
-
-## env
-
-#### langchain
-py3.11
+### env
+py311
 ```
-pip install langgraph
-
+pip install langgraph langchain-community langchain-core httpx
 ```
-
-#### ollama
-
-
-## 
-
