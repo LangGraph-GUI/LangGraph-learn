@@ -8,14 +8,14 @@ class LotteryState(TypedDict):
     winnings: Union[str, None]
     missed: Union[str, None]
 
-
+# for node
 def BuyLottery(state: LotteryState):
     random_number = random.randint(0, 2)
     print("buy number: " + str(random_number))
     state['input'] = random_number
     return state
 
-
+# for node
 def Checking(state: LotteryState):
     prize_number = random.randint(0, 2)
     print("prize number: " + str(prize_number))
@@ -26,7 +26,7 @@ def Checking(state: LotteryState):
         state['missed'] = "missed"
         return state
 
-
+# for conditional edges
 def checking_result(state: LotteryState) -> Literal["win", "missed"]:
     if state.get("winnings") == "win":
         print("You win! Go home.")
