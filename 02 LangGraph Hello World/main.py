@@ -8,7 +8,6 @@ def function_2(input_2):
     return input_2 + "World!"
 
 
-
 # Define a Langchain graph
 workflow = Graph()
 
@@ -21,7 +20,5 @@ workflow.set_entry_point("node_1")
 workflow.set_finish_point("node_2")
 
 app = workflow.compile()
-
-app.invoke("langgraph: ")
 
 print(app.invoke("langgraph: "))

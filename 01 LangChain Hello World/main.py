@@ -15,7 +15,7 @@ prompt = PromptTemplate.from_template(template)
 # Format the prompt with the input variable
 formatted_prompt = prompt.format(question="Tell me about you")
 
-
+# define langchain
 llm_chain = prompt | llm | StrOutputParser()
 generation = llm_chain.invoke(formatted_prompt)
 
