@@ -134,7 +134,6 @@ app = workflow.compile()
 
 app.invoke("write an article, content is startup.md ")
 
-print(app.invoke("write an article, content is startup.md "))
 ```
 
 ## Running the Script

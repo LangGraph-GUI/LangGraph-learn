@@ -89,9 +89,9 @@ Compile the workflow and invoke it:
 ```python
 app = workflow.compile()
 
-app.invoke("langgraph: ")
+output = app.invoke("langgraph: ")
 
-print(app.invoke("langgraph: "))
+print(output)
 ```
 
 ## Running the Script
