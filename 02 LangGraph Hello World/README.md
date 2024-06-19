@@ -2,6 +2,8 @@
 
 This project demonstrates the use of the `langgraph` library to create a simple workflow graph with two nodes. Each node represents a function that processes input data and passes it to the next node.
 
+This tutorials is refer to [Learn LangGraph - The Easy Way](https://www.youtube.com/watch?v=R8KB-Zcynxc).
+
 ## Environment Setup
 
 ### Prerequisites
@@ -108,6 +110,3 @@ print(output)
 - Ensure all dependencies are installed and the `ollama` server is running before executing the script (if needed).
 - Adjust the functions and workflow as needed to suit your use case.
 
-## Additional Resources
-
-For more information and tutorials on using `LangGraph`, refer to [Learn LangGraph - The Easy Way](https://www.youtube.com/watch?v=R8KB-Zcynxc).

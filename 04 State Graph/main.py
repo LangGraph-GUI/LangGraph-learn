@@ -10,13 +10,16 @@ class LotteryState(TypedDict):
 
 
 def BuyLottery(state: LotteryState):
-    random_number = random.randint(0, 3)
+    random_number = random.randint(0, 2)
+    print("buy number: " + str(random_number))
     state['input'] = random_number
     return state
 
 
 def Checking(state: LotteryState):
-    if state['input'] == 0:
+    prize_number = random.randint(0, 2)
+    print("prize number: " + str(prize_number))
+    if state['input'] == prize_number:
         state['winnings'] = "win"
         return state
     else:
@@ -27,10 +30,10 @@ def Checking(state: LotteryState):
 def checking_result(state: LotteryState) -> Literal["buy", END]:
     if state.get("winnings") == "win":
         print("You win! Go home.")
-        return END
+        return "win"
     else:
         print("You missed. Buy again.")
-        return "buy"
+        return "missed"
 
 
 # Define a LangGraph state machine
@@ -51,8 +54,8 @@ workflow.add_conditional_edges(
     "check",
     checking_result,
     {
-        "buy": "buy",
-        END: END,
+        "missed": "buy",
+        "win": END,
     },
 )
 
