@@ -32,24 +32,26 @@ from typing import TypedDict, Literal, Union
 import random
 ```
 
-### Defining State and Functions
+### Defining Node and Edge function
 
 Define a `TypedDict` for the lottery state and functions representing different actions in the lottery process:
 
 ```python
+# for state
 class LotteryState(TypedDict):
     input: str
     winnings: Union[str, None]
     missed: Union[str, None]
 
 
+# for node
 def BuyLottery(state: LotteryState):
     random_number = random.randint(0, 2)
     print("buy number: " + str(random_number))
     state['input'] = random_number
     return state
 
-
+# for node
 def Checking(state: LotteryState):
     prize_number = random.randint(0, 2)
     print("prize number: " + str(prize_number))
@@ -60,7 +62,7 @@ def Checking(state: LotteryState):
         state['missed'] = "missed"
         return state
 
-
+# for conditional edges
 def checking_result(state: LotteryState) -> Literal["win", "missed"]:
     if state.get("winnings") == "win":
         print("You win! Go home.")
@@ -108,8 +110,9 @@ Compile the workflow into a runnable app and start the lottery process:
 app = workflow.compile()
 
 # Start the lottery process
-for s in app.stream({"input": "", "winnings": None, "missed": None}):
-    print(s)
+final_state = app.stream({"input": "", "winnings": None, "missed": None})
+
+print("Final State:", final_state)
 ```
 
 ## Running the Script
