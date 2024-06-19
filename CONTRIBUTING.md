@@ -6,7 +6,7 @@ Thank you for considering contributing to LangGraph-learn! We welcome contributi
 
 ### 1. Fork the Repository
 
-1. Navigate to the [LangGraph-learn repository](https://github.com/your-repo-url).
+1. Navigate to the [LangGraph-learn repository]([https://github.com/your-repo-url](https://github.com/LangGraph-GUI/LangGraph-learn)).
 2. Click the "Fork" button in the upper right corner of the repository page. This will create a copy of the repository in your GitHub account.
 
 ### 2. Clone Your Fork
