@@ -108,7 +108,7 @@ Compile the workflow into a runnable app and start the lottery process:
 app = workflow.compile()
 
 # Start the lottery process
-final_state = app.invoke({"input": "", "winnings": None, "missed": None})
+final_state = app.stream({"input": "", "winnings": None, "missed": None})
 
 print("Final State:", final_state)
 ```

@@ -63,6 +63,5 @@ workflow.add_conditional_edges(
 app = workflow.compile()
 
 # Start the lottery process
-final_state = app.invoke({"input": "", "winnings": None, "missed": None})
-
-print("Final State:", final_state)
+for s in app.stream({"input": "", "winnings": None, "missed": None}):
+    print(s)
