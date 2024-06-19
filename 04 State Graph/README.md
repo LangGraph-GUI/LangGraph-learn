@@ -61,7 +61,7 @@ def Checking(state: LotteryState):
         return state
 
 
-def checking_result(state: LotteryState) -> Literal["buy", END]:
+def checking_result(state: LotteryState) -> Literal["win", "missed"]:
     if state.get("winnings") == "win":
         print("You win! Go home.")
         return "win"
