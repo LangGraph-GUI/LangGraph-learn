@@ -6,7 +6,7 @@ Thank you for considering contributing to LangGraph-learn! We welcome contributi
 
 ### 1. Fork the Repository
 
-1. Navigate to the [LangGraph-learn repository]([https://github.com/your-repo-url](https://github.com/LangGraph-GUI/LangGraph-learn)).
+1. Navigate to the [LangGraph-learn repository](https://github.com/LangGraph-GUI/LangGraph-learn).
 2. Click the "Fork" button in the upper right corner of the repository page. This will create a copy of the repository in your GitHub account.
 
 ### 2. Clone Your Fork
@@ -48,7 +48,7 @@ git push origin your-branch-name
 
 ### 7. Create a Pull Request
 
-1. Navigate to the original [LangGraph-learn repository](https://github.com/your-repo-url).
+1. Navigate to the original [LangGraph-learn repository](https://github.com/LangGraph-GUI/LangGraph-learn).
 2. Click on the "Pull requests" tab and then click the "New pull request" button.
 3. Select your fork and branch as the source and the original repository and branch as the destination.
 4. Provide a clear title and description for your pull request.
