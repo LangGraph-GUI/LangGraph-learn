@@ -37,9 +37,9 @@ class AgentBase(ABC):
         return self.state
 ```
 
-#### Specific Task Classes
+#### Roles
 
-Define specific task classes for DM and Player.
+Define agents for DM and Player.
 
 ```python
 class DM(AgentBase):
@@ -61,7 +61,7 @@ class Player(AgentBase):
         """
 ```
 
-#### Roll Dice Function
+#### Tool
 
 A function to simulate rolling a 20-sided dice.
 
@@ -75,9 +75,9 @@ def RollDice(state: TRPGState) -> TRPGState:
     return state
 ```
 
-#### Conditional to use Tool Function
+#### Conditional Edge to use Tool Function
 
-A function to check if a roll is needed.
+for conditional edge
 
 ```python
 def check_need_roll(state: TRPGState) -> Literal["roll", "not roll"]:
@@ -85,4 +85,16 @@ def check_need_roll(state: TRPGState) -> Literal["roll", "not roll"]:
         return "roll"
     else:
         return "not roll"
+```
+
+
+```python
+workflow.add_conditional_edges(
+    "dm",
+    check_need_roll,
+    {
+        "not roll": "player",
+        "roll": "RollDice"
+    }
+)
 ```
