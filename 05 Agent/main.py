@@ -8,7 +8,7 @@ from langchain_core.output_parsers import StrOutputParser
 from abc import ABC, abstractmethod
 
 # Specify the local language model
-local_llm = "phi3"
+local_llm = "mistral"
 llm = ChatOllama(model=local_llm, format="json", temperature=0)
 
 # Function to clip history to the last 8000 characters
@@ -19,7 +19,6 @@ def clip_history(history: str, max_chars: int = 8000) -> str:
 
 # Define the state for our workflow
 class TRPGState(TypedDict):
-    role: str
     history: str
 
 # Define the base class for tasks
@@ -29,10 +28,6 @@ class AgentBase(ABC):
 
     @abstractmethod
     def get_prompt_template(self) -> str:
-        pass
-
-    @abstractmethod
-    def update_role(self) -> None:
         pass
 
     def execute(self) -> TRPGState:
@@ -51,29 +46,23 @@ class AgentBase(ABC):
         # Clip the history to the last 8000 characters
         self.state["history"] = clip_history(self.state["history"])
 
-        self.update_role()
         return self.state
 
 # Define specific task classes
 class DM(AgentBase):
     def get_prompt_template(self) -> str:
         return """
-            Based on the following history: {history}
-            You are the DM. Describe the current scenario for the player 
+            {history}
+            As DM. Describe the current scenario for the player 
         """
-    
-    def update_role(self) -> None:
-        self.state["role"] = "Player"
 
 class Player(AgentBase):
     def get_prompt_template(self) -> str:
         return """
             Here is the scenario: {history}
-            You are the player. What do you do?
+            As a Player, I want 
+            output is action
         """
-    
-    def update_role(self) -> None:
-        self.state["role"] = "DM"
 
 # Define the state machine
 workflow = StateGraph(TRPGState)
