@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 local_llm = "mistral"
 llm = ChatOllama(model=local_llm, format="json", temperature=0)
 
-# Function to clip history to the last 8000 characters
+# Clip the history to the last 8000 characters
 def clip_history(history: str, max_chars: int = 8000) -> str:
     if len(history) > max_chars:
         return history[-max_chars:]
@@ -20,7 +20,8 @@ def clip_history(history: str, max_chars: int = 8000) -> str:
 # Define the state for our workflow
 class TRPGState(TypedDict):
     history: str
-    roll_dice: bool
+    need_roll: bool
+    roll_number: int
 
 # Define the base class for tasks
 class AgentBase(ABC):
@@ -38,19 +39,17 @@ class AgentBase(ABC):
         # Define the prompt template
         template = self.get_prompt_template()
         prompt = PromptTemplate.from_template(template)
-        formatted_prompt = prompt.format(history=self.state["history"])
+        formatted_prompt = prompt.format(history=self.state["history"], roll_number=str(self.state["roll_number"]))
         
         llm_chain = prompt | llm | StrOutputParser()
-        generation = llm_chain.invoke(formatted_prompt)
-
-        print("using llm:")
-        print(generation)
+        generation = llm_chain.invoke({"history": self.state["history"], "roll_number": self.state["roll_number"]})
         
         data = json.loads(generation)
-        self.state["roll_dice"] = data.get("roll_dice", "")
-        
+        self.state["need_roll"] = data.get("need_roll", "")        
+        self.state["roll_number"] = -1
+
+
         self.state["history"] += "\n" + generation
-        # Clip the history to the last 8000 characters
         self.state["history"] = clip_history(self.state["history"])
 
         return self.state
@@ -61,9 +60,9 @@ class DM(AgentBase):
         return """
             {history}
             As DnD DM, describe the current scenario for the player. (in short, we do fast play)
-            sometimes roll dice, sometimes not.
-            If players roll, you need explain what the roll affect result
-            Output the JSON in the format: {{"scenario": "your action description", "roll_dice": True/False}}
+            sometimes roll dice, sometimes not.            
+            player roll {roll_number}, if > 0 you need explain what the roll affect result, start from your roll {roll_number} blablabla
+            Output the JSON in the format: {{"scenario": "your action description", "need_roll": True/False}}
         """
 
 class Player(AgentBase):
@@ -71,22 +70,22 @@ class Player(AgentBase):
         return """
             Here is the scenario: {history}
             As a Player, I want to perform an action. (in short, we do fast play)
-            Output the JSON in the format: {{"action": "your action description"}}
+            Output the JSON in the format: {{"action": "I want xxxx"}}
         """
-def RollDice(state: TRPGState):
+def RollDice(state: TRPGState) -> TRPGState:
     random_number = random.randint(1, 20)
-    state["history"] += "\n" +  "player roll" + str(random_number)
+    state["history"] += "\n" +  "roll result:" + str(random_number)
     state["history"] = clip_history(state["history"])
-    state["roll_dice"] = False
+    state["need_roll"] = False
+    state["roll_number"] = random_number
     return state
 
 # for conditional edges
-def check_roll_dice(state: TRPGState) -> Literal["roll", "not roll"]:
-    if state.get("roll_dice") == True:
+def check_need_roll(state: TRPGState) -> Literal["roll", "not roll"]:
+    if state.get("need_roll") == True:
         return "roll"
     else:
         return "not roll"
-
 
 # Define the state machine
 workflow = StateGraph(TRPGState)
@@ -108,7 +107,7 @@ workflow.set_entry_point("dm")
 
 workflow.add_conditional_edges(
     "dm",
-    check_roll_dice,
+    check_need_roll,
     {
         "not roll": "player",
         "roll": "RollDice"
@@ -123,8 +122,12 @@ workflow.add_edge("RollDice", "dm")
 app = workflow.compile()
 
 # Initialize the state
-initial_state = TRPGState(role="DM", history="A monster appears in front of you.")
-
+initial_state = TRPGState(
+    role="DM", 
+    history="A monster appears in front of you.",
+    need_roll=False, 
+    roll_number=-1
+    )
 
 for s in app.stream(initial_state):
     # Print the current state
