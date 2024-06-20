@@ -38,9 +38,7 @@ class AgentBase(ABC):
         
         # Define the prompt template
         template = self.get_prompt_template()
-        prompt = PromptTemplate.from_template(template)
-        formatted_prompt = prompt.format(history=self.state["history"], roll_number=str(self.state["roll_number"]))
-        
+        prompt = PromptTemplate.from_template(template)        
         llm_chain = prompt | llm | StrOutputParser()
         generation = llm_chain.invoke({"history": self.state["history"], "roll_number": self.state["roll_number"]})
         
