@@ -52,7 +52,7 @@ class AgentBase(ABC):
 
         return self.state
 
-# Define specific task classes
+# Define agents
 class DM(AgentBase):
     def get_prompt_template(self) -> str:
         return """
@@ -70,6 +70,9 @@ class Player(AgentBase):
             As a Player, I want to perform an action. (in short, we do fast play)
             Output the JSON in the format: {{"action": "I want xxxx"}}
         """
+
+
+# Define tool
 def RollDice(state: TRPGState) -> TRPGState:
     random_number = random.randint(1, 20)
     state["history"] += "\n" +  "roll result:" + str(random_number)
@@ -121,7 +124,6 @@ app = workflow.compile()
 
 # Initialize the state
 initial_state = TRPGState(
-    role="DM", 
     history="A monster appears in front of you.",
     need_roll=False, 
     roll_number=-1
