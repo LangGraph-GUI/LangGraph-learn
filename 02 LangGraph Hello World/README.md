@@ -10,7 +10,6 @@ This tutorials is refer to [Learn LangGraph - The Easy Way](https://www.youtube.
 
 - Python 3.11
 - `langgraph` library
-- `ollama` server (if needed)
 
 ### Installing Dependencies
 
@@ -19,33 +18,11 @@ Install the necessary Python package:
 pip install langgraph
 ```
 
-### Setting Up the Ollama Server
-
-If your project requires the `ollama` server, follow these steps to set up and run it:
-
-1. Open a terminal and start the `ollama` server:
-   ```sh
-   ollama serve
-   ```
-
-2. Open another terminal and run the Python script:
-   ```sh
-   python main.py
-   ```
-
-## Script Explanation
-
-### Importing Libraries
-
-The script starts by importing the necessary library:
-
-```python
-from langgraph.graph import Graph
-```
+## Core Explanation
 
 ### Defining Functions
 
-Define two simple functions to be used in the workflow:
+Define two simple node to be used in the workflow:
 
 ```python
 def function_1(input_1):
@@ -98,15 +75,7 @@ print(output)
 
 ## Running the Script
 
-1. Ensure all dependencies are installed as described in the [Installing Dependencies](#installing-dependencies) section.
-2. If required, ensure the `ollama` server is running as described in the [Setting Up the Ollama Server](#setting-up-the-ollama-server) section.
-3. Run the Python script:
+Run the Python script:
    ```sh
    python main.py
    ```
-
-## Notes
-
-- Ensure all dependencies are installed and the `ollama` server is running before executing the script (if needed).
-- Adjust the functions and workflow as needed to suit your use case.
-

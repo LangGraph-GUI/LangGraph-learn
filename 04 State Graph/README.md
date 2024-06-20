@@ -6,31 +6,10 @@ This tutorials is ref from
 * [Learn LangGraph - The Easy Way](https://www.youtube.com/watch?v=R8KB-Zcynxc).
 * [langgraph_code_assistant.ipynb](https://github.com/langchain-ai/langgraph/blob/main/examples/code_assistant/langgraph_code_assistant.ipynb)
 
-## Environment Setup
+## Core Explanation
 
-### Prerequisites
-
-- Python 3.11
-- `langgraph` library
-
-### Installing Dependencies
-
-Install the necessary Python package:
-```sh
-pip install langgraph
-```
-
-## Script Explanation
-
-### Importing Libraries
-
-The script starts by importing the necessary libraries:
-
-```python
-from langgraph.graph import StateGraph, END
-from typing import TypedDict, Literal, Union
-import random
-```
+* We need State as global state machine to store info like chat history
+* We need conditional edge to make the state machine able to swtich states
 
 ### Defining Node and Edge function
 

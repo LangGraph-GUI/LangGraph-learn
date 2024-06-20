@@ -31,17 +31,7 @@ Follow these steps to set up and run the `ollama` server:
    python main.py
    ```
 
-## Script Explanation
-
-### Importing Libraries
-
-The script starts by importing the necessary libraries from the `langchain` ecosystem:
-
-```python
-from langchain_community.chat_models import ChatOllama
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-```
+## Core Explanation
 
 ### Specifying the Local Language Model
 
@@ -86,14 +76,6 @@ llm_chain = prompt | llm | StrOutputParser()
 generation = llm_chain.invoke(formatted_prompt)
 ```
 
-### Printing the Output
-
-Print the generated output:
-
-```python
-print(generation)
-```
-
 ## Running the Script
 
 1. Ensure the `ollama` server is running as described in the [Setting Up the Ollama Server](#setting-up-the-ollama-server) section.
@@ -101,8 +83,3 @@ print(generation)
    ```sh
    python main.py
    ```
-
-## Notes
-
-- Ensure all dependencies are installed and the `ollama` server is running before executing the script.
-- Adjust the prompt template and input question as needed to suit your use case.
