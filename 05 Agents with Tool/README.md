@@ -26,7 +26,6 @@ class AgentBase(ABC):
         self.state["history"] = clip_history(self.state["history"])
         template = self.get_prompt_template()
         prompt = PromptTemplate.from_template(template)
-        formatted_prompt = prompt.format(history=self.state["history"], roll_number=str(self.state["roll_number"]))
         llm_chain = prompt | llm | StrOutputParser()
         generation = llm_chain.invoke({"history": self.state["history"], "roll_number": self.state["roll_number"]})
         data = json.loads(generation)
