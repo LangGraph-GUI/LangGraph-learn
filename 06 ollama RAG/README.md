@@ -1,3 +1,9 @@
+pip install langchain langchain-community ollama chromadb
+
+
+
+
+
 pip install llama-index-llms-langchain langgraph langchain-community langchain-core llama-index
 
 
