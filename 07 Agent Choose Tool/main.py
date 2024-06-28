@@ -20,7 +20,9 @@ def clip_history(history: str, max_chars: int = 8000) -> str:
 # Define the state for our workflow
 class ToolState(TypedDict):
     history: str
-    use_toll: bool
+    use_tool: bool
+    tool_exec: str
+
 
 # Define the base class for tasks
 class AgentBase(ABC):
@@ -39,10 +41,10 @@ class AgentBase(ABC):
         template = self.get_prompt_template()
         prompt = PromptTemplate.from_template(template)        
         llm_chain = prompt | llm | StrOutputParser()
-        generation = llm_chain.invoke({"history": self.state["history"], "use_toll": self.state["use_toll"]})
+        generation = llm_chain.invoke({"history": self.state["history"], "use_tool": self.state["use_tool"]})
         data = json.loads(generation)
         self.state["use_tool"] = data.get("use_tool", "")        
-
+        self.state["tool_exec"] = data
 
         self.state["history"] += "\n" + generation
         self.state["history"] = clip_history(self.state["history"])
@@ -65,8 +67,14 @@ class ToolAgent(AgentBase):
             History: {history}
             Available tools: {tools_list}
             Based on the history, choose the appropriate tool and arguments in the format:
-            {{"use_tool": "<function>", "args": [<arg1>,<arg2>, ...]}}
+            {{"function": "<function>", "args": [<arg1>,<arg2>, ...]}}
         """
+
+def ToolExecute(state: ToolState) -> ToolState:
+    choice = self.llm_output(self.state["tool_exec"])
+    tool_name = choice["use_tool"]
+    args = self.convert_args(tool_name, choice["args"])
+    result = globals()[tool_name](*args)
 
 # for conditional edges
 def check_use_tool(state: ToolState) -> Literal["use tool", "not use tool"]:
@@ -87,6 +95,7 @@ def tool_agent(state: ToolState) -> ToolState:
 
 workflow.add_node("chat_agent", chat_agent)
 workflow.add_node("tool_agent", tool_agent)
+workflow.add_node("tool", ToolExecute)
 
 workflow.set_entry_point("chat_agent")
 
@@ -101,12 +110,16 @@ workflow.add_conditional_edges(
     }
 )
 
+workflow.add_edge('tool_agent', 'tool')
+
+
+
 # Compile the workflow into a runnable app
 app = workflow.compile()
 
 # Initialize the state
 initial_state = ToolState(
-    history="what files we have in current folder",
+    history="help me ls files in current folder",
     use_tool=False, 
     )
 
