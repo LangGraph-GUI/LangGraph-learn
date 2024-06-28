@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 tool_registry: List[Dict[str, Any]] = []
 
 # Decorator to register tools
-def register_tool(func: Callable) -> Callable:
+def tool(func: Callable) -> Callable:
     signature = inspect.signature(func)
     docstring = func.__doc__ or ""
     params = [
@@ -28,7 +28,7 @@ def register_tool(func: Callable) -> Callable:
     return func
 
 # Define the tools with detailed parameter descriptions in the docstrings
-@register_tool
+@tool
 def add(a: int, b: int) -> int:
     """
     :function: add   
@@ -38,7 +38,7 @@ def add(a: int, b: int) -> int:
     """
     return a + b
 
-@register_tool
+@tool
 def ls() -> List[str]:
     """
     :function: ls
@@ -47,7 +47,7 @@ def ls() -> List[str]:
     # Fake implementation
     return ["file1.txt", "file2.txt", "file3.txt"]
 
-@register_tool
+@tool
 def filewrite(name: str, content: str) -> None:
     """
     :function: filewrite
