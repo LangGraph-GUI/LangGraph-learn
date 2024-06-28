@@ -1,11 +1,64 @@
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Literal
+from typing import Callable, Dict, List, Any, TypedDict
+import inspect
 import random
 import json
 from langchain_community.chat_models import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from abc import ABC, abstractmethod
+
+# Tool registry to hold information about tools
+tool_registry: List[Dict[str, Any]] = []
+
+# Decorator to register tools
+def register_tool(func: Callable) -> Callable:
+    signature = inspect.signature(func)
+    docstring = func.__doc__ or ""
+    params = [
+        {"name": param.name, "type": param.annotation}
+        for param in signature.parameters.values()
+    ]
+    tool_info = {
+        "name": func.__name__,
+        "description": docstring,
+        "parameters": params
+    }
+    tool_registry.append(tool_info)
+    return func
+
+# Define the tools with detailed parameter descriptions in the docstrings
+@register_tool
+def add(a: int, b: int) -> int:
+    """
+    :function: add   
+    :param int a: First number to add
+    :param int b: Second number to add
+    :return: Sum of a and b
+    """
+    return a + b
+
+@register_tool
+def ls() -> List[str]:
+    """
+    :function: ls
+    :return: List of filenames in the current directory
+    """
+    # Fake implementation
+    return ["file1.txt", "file2.txt", "file3.txt"]
+
+@register_tool
+def filewrite(name: str, content: str) -> None:
+    """
+    :function: filewrite
+    :param str name: Name of the file
+    :param str content: Content to write to the file
+    :return: None
+    """
+    # Fake implementation
+    print(f"Writing to {name}: {content}")
+
 
 # Specify the local language model
 local_llm = "mistral"
