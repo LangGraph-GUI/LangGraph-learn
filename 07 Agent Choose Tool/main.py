@@ -99,7 +99,7 @@ class AgentBase(ABC):
         })
         data = json.loads(generation)
         self.state["use_tool"] = data.get("use_tool", False)        
-        self.state["tool_exec"] = data.get("tool_exec", "")
+        self.state["tool_exec"] = generation
 
         self.state["history"] += "\n" + generation
         self.state["history"] = clip_history(self.state["history"])
@@ -110,8 +110,8 @@ class AgentBase(ABC):
 class ChatAgent(AgentBase):
     def get_prompt_template(self) -> str:
         return """
-            {history}
             Available tools: {tools_list}
+            Question: {history}
             As ChatAgent, decide if we need to use a tool or not.
             If we don't need a tool, just reply; otherwise, let the ToolAgent handle it.
             Output the JSON in the format: {{"scenario": "your reply", "use_tool": True/False}}
@@ -126,7 +126,10 @@ class ToolAgent(AgentBase):
             {{"function": "<function>", "args": [<arg1>,<arg2>, ...]}}
         """
 
-def ToolExecute(state: ToolState) -> ToolState:
+def ToolExecutor(state: ToolState) -> ToolState:
+    if not state["tool_exec"]:
+        raise ValueError("No tool_exec data available to execute.")
+    
     choice = json.loads(state["tool_exec"])
     tool_name = choice["function"]
     args = choice["args"]
@@ -134,6 +137,7 @@ def ToolExecute(state: ToolState) -> ToolState:
     state["history"] += f"\nExecuted {tool_name} with result: {result}"
     state["history"] = clip_history(state["history"])
     state["use_tool"] = False
+    state["tool_exec"] = ""
     return state
 
 # For conditional edges
@@ -155,7 +159,7 @@ def tool_agent(state: ToolState) -> ToolState:
 
 workflow.add_node("chat_agent", chat_agent)
 workflow.add_node("tool_agent", tool_agent)
-workflow.add_node("tool", ToolExecute)
+workflow.add_node("tool", ToolExecutor)
 
 workflow.set_entry_point("chat_agent")
 
@@ -170,7 +174,7 @@ workflow.add_conditional_edges(
 )
 
 workflow.add_edge('tool_agent', 'tool')
-workflow.add_edge('tool', 'chat_agent')
+workflow.add_edge('tool', END)
 
 # Generate the tools list
 tools_list = json.dumps([
@@ -187,6 +191,20 @@ app = workflow.compile()
 # Initialize the state
 initial_state = ToolState(
     history="help me ls files in current folder",
+    use_tool=False,
+    tool_exec="",
+    tools_list=tools_list
+)
+
+for s in app.stream(initial_state):
+    # Print the current state
+    print(s)
+
+
+
+# Initialize the state
+initial_state = ToolState(
+    history="who are you",
     use_tool=False,
     tool_exec="",
     tools_list=tools_list
