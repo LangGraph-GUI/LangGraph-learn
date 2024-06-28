@@ -9,7 +9,8 @@ from langchain_core.output_parsers import StrOutputParser
 from abc import ABC, abstractmethod
 
 # Tool registry to hold information about tools
-tool_registry: List[Dict[str, Any]] = []
+tool_registry: Dict[str, Callable] = {}
+tool_info_registry: List[Dict[str, Any]] = []
 
 # Decorator to register tools
 def tool(func: Callable) -> Callable:
@@ -24,19 +25,20 @@ def tool(func: Callable) -> Callable:
         "description": docstring,
         "parameters": params
     }
-    tool_registry.append(tool_info)
+    tool_registry[func.__name__] = func
+    tool_info_registry.append(tool_info)
     return func
 
 # Define the tools with detailed parameter descriptions in the docstrings
 @tool
-def add(a: int, b: int) -> int:
+def mul(a: int, b: int) -> int:
     """
-    :function: add   
+    :function: mul   
     :param int a: First number to add
     :param int b: Second number to add
-    :return: Sum of a and b
+    :return: a * b
     """
-    return a + b
+    return a * b
 
 @tool
 def ls() -> List[str]:
@@ -57,10 +59,6 @@ def filewrite(name: str, content: str) -> None:
     """
     # Fake implementation
     print(f"Writing to {name}: {content}")
-
-# Specify the local language model
-local_llm = "mistral"
-llm = ChatOllama(model=local_llm, format="json", temperature=0)
 
 # Clip the history to the last 8000 characters
 def clip_history(history: str, max_chars: int = 8000) -> str:
@@ -91,6 +89,7 @@ class AgentBase(ABC):
         # Define the prompt template
         template = self.get_prompt_template()
         prompt = PromptTemplate.from_template(template)        
+        llm = ChatOllama(model="mistral", format="json", temperature=0)
         llm_chain = prompt | llm | StrOutputParser()
         generation = llm_chain.invoke({
             "history": self.state["history"], 
@@ -133,7 +132,11 @@ def ToolExecutor(state: ToolState) -> ToolState:
     choice = json.loads(state["tool_exec"])
     tool_name = choice["function"]
     args = choice["args"]
-    result = globals()[tool_name](*args)
+    
+    if tool_name not in tool_registry:
+        raise ValueError(f"Tool {tool_name} not found in registry.")
+    
+    result = tool_registry[tool_name](*args)
     state["history"] += f"\nExecuted {tool_name} with result: {result}"
     state["history"] = clip_history(state["history"])
     state["use_tool"] = False
@@ -182,34 +185,24 @@ tools_list = json.dumps([
         "name": tool["name"],
         "description": tool["description"]
     }
-    for tool in tool_registry
+    for tool in tool_info_registry
 ])
 
 # Compile the workflow into a runnable app
 app = workflow.compile()
 
-# Initialize the state
-initial_state = ToolState(
-    history="help me ls files in current folder",
-    use_tool=False,
-    tool_exec="",
-    tools_list=tools_list
-)
+def question(history: str) -> None:
+    initial_state = ToolState(
+        history=history,
+        use_tool=False,
+        tool_exec="",
+        tools_list=tools_list
+    )
 
-for s in app.stream(initial_state):
-    # Print the current state
-    print(s)
+    for state in app.stream(initial_state):
+        print(state)
 
-
-
-# Initialize the state
-initial_state = ToolState(
-    history="who are you",
-    use_tool=False,
-    tool_exec="",
-    tools_list=tools_list
-)
-
-for s in app.stream(initial_state):
-    # Print the current state
-    print(s)
+# Example usage
+if __name__ == "__main__":
+    question("help me ls files in current folder")
+    question("who are you")
