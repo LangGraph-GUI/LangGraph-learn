@@ -13,6 +13,14 @@ This tutorials is ref from
 
 ### Defining Node and Edge function
 
+```mermaid
+graph TD;
+    A[Buy lottery ticket] -->|Check prize| C{Win?};
+    C -- Yes --> D[Go home];
+    C -- No --> A;
+
+```
+
 Define a `TypedDict` for the lottery state and functions representing different actions in the lottery process:
 
 ```python
