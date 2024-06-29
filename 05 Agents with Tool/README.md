@@ -8,6 +8,16 @@ This tutorial demonstrated how to create a simple TRPG agent using LangChain and
 * We use AgentBase as Agents for different role
 * We use Conditional Edge to use Tool
 
+```mermaid
+graph TD;
+    A[Dugen Master] --> B{need roll?};
+    B -- Yes --> C[Roll Dice];
+    B -- No --> D[Player];
+    D --> A;
+    C --> A;
+
+
+```
 
 #### Base Class for Agent
 
