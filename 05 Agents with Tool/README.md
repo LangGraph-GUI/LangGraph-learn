@@ -10,9 +10,9 @@ This tutorial demonstrated how to create a simple TRPG agent using LangChain and
 
 ```mermaid
 graph TD;
-    A[Dugen Master] --> B{need roll?};
+    A((DugenMaster)) --> B{need roll?};
     B -- Yes --> C[Roll Dice];
-    B -- No --> D[Player];
+    B -- No --> D((Player));
     D --> A;
     C --> A;
 
