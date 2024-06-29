@@ -15,7 +15,7 @@ This tutorials is ref from
 
 ```mermaid
 graph TD;
-    A[Buy lottery ticket] -->|Check prize| C{Win?};
+    A((Buy lottery)) --> C((Check prize));
     C -- Yes --> D[Go home];
     C -- No --> A;
 
