@@ -4,6 +4,13 @@ In this tutorial, tools are functions that can be dynamically used within the st
 
 Further, we have an agent to decide whether to use a tool or not and let the tool_agent give commands to execute the chosen tool. 
 
+```mermaid
+graph TD;
+    A((ChatAgent)) --> B{Use tool?};
+    B -- Yes --> C((ToolAgent)) --> D[ToolExecutor];
+    B -- No --> E[END];
+```
+
 ## Core Explanation
 
 ### Defining and Registering Tools
