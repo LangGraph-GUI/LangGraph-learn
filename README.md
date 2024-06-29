@@ -30,7 +30,7 @@ To get started with LangGraph-learn, you will need to set up your environment. H
 
    You can install these packages using pip:
    ```bash
-   pip install langgraph langchain-community langchain-core httpx tenacity<8.4.0
+   pip install langchain langchain-community langchain-core ollama chromadb langgraph
    ```
    Please bear in mind, this is generic and will be updated in all sub folders as needed.
 
