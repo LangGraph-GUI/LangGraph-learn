@@ -2,8 +2,6 @@
 
 Welcome to LangGraph-learn, a community-driven project aimed at mastering LangGraph and other AI-related topics. This repository provides a variety of hands-on examples and resources to help you learn how to create and manage language model workflows using LangGraph and related tools.
 
-[![Discord](https://img.icons8.com/ios-filled/50/000000/discord-logo.png)](https://discord.gg/NsdFe7J4)
-
 ## Table of Contents
 
 - [Introduction](#introduction)
