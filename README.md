@@ -1,6 +1,6 @@
 # LangGraph-learn
 
-`The project is for understanding [LangGraph-GUI](https://github.com/LangGraph-GUI/LangGraph-GUI) backend langgraph part.`
+``The project is for understanding [LangGraph-GUI](https://github.com/LangGraph-GUI/LangGraph-GUI) backend langgraph part.``
 
 Welcome to LangGraph-learn, a community-driven project aimed at mastering LangGraph and other AI-related topics. This repository provides a variety of hands-on examples and resources to help you learn how to create and manage language model workflows using LangGraph and related tools.
 
