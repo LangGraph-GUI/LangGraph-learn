@@ -1,20 +1,11 @@
 from langgraph.graph import StateGraph, END, START
 from typing import TypedDict, Literal, Union, Dict, Callable, Any
 import random
-from langchain_community.chat_models import ChatOllama
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
 # ==========================
 # Subgraph Registry
 # ==========================
 subgraph_registry: Dict[str, Any] = {}
-
-# ==========================
-# Common state
-# ==========================
-class SharedState(TypedDict):
-    buy_item: Union[str, None]
 
 # ==========================
 # Subgraph: Lottery
@@ -26,9 +17,10 @@ class LotteryState(TypedDict):
     try_times: int
 
 def BuyLottery(state: LotteryState):
-    random_number = random.randint(0, 2)
+    random_number = random.randint(0, 3)
     print("buy number: " + str(random_number))
     state['input'] = random_number
+    state['try_times'] += 1 
     return state
 
 def Checking(state: LotteryState):
@@ -43,7 +35,7 @@ def Checking(state: LotteryState):
 
 def checking_result(state: LotteryState) -> Literal["win", "missed"]:
     if state.get("winnings") == "win":
-        print("You win! return to root.")
+        print("You win!")
         return "win"
     else:
         print("You missed. Buy again.")
@@ -71,34 +63,50 @@ subgraph_registry["lottery"] = lottery_graph
 # ==========================
 class BuyState(TypedDict):
     buy_item: str
+    try_times: int
 
-def buy_ice_cream(state: BuyState):
-    print("Buy ice cream")
-    return {"buy_item": "ice cream"}
+def buy_reward(state: BuyState):
+    if state.get("try_times", 0) > 2:
+        print("Buy ice cream")
+        return {"buy_item": "ice cream", "try_times": state.get("try_times")}
+    else:
+        print("Buy cookie")
+        return {"buy_item": "cookie", "try_times": state.get("try_times")}
+
 
 buy_builder = StateGraph(BuyState)
-buy_builder.add_node("buy", buy_ice_cream)
+buy_builder.add_node("buy", buy_reward)
 buy_builder.set_entry_point("buy")
 buy_graph = buy_builder.compile()
 
 subgraph_registry["buy"] = buy_graph
-
 
 # ==========================
 # Subgraph: Root
 # ==========================
 class RootState(TypedDict):
     buy_item: Union[str, None]
+    lottery_result: Union[str, None]
+    try_times: int
     
 def route_to_lottery(state: RootState):
     subgraph = subgraph_registry["lottery"]
-    response = subgraph.invoke({"input": "0", "winnings": None, "missed": None, "try_times": 0})
-    return {"buy_item": state["buy_item"], "lottery_result": response.get("winnings")}
+    
+    # Pass the try_times from RootState into LotteryState
+    lottery_state = {"input": "0", "winnings": None, "missed": None, "try_times": state.get('try_times', 0)}
+    response = subgraph.invoke(lottery_state)
+    
+    # Print try times before buy
+    print("Lottery try times:", response.get("try_times"))
+    
+    return {"buy_item": state["buy_item"], "lottery_result": response.get("winnings"), "try_times": response.get("try_times")}
+
 
 def route_to_buy(state: RootState):
     subgraph = subgraph_registry["buy"]
-    response = subgraph.invoke({"buy_item": state['buy_item']})
-    return {"buy_item": response.get("buy_item")}
+    # Pass try_times to buy subgraph
+    response = subgraph.invoke({"buy_item": state['buy_item'], "try_times": state.get("try_times")})
+    return {"buy_item": response.get("buy_item"), "lottery_result": state.get("lottery_result"), "try_times": response.get("try_times")}
 
 root_builder = StateGraph(RootState)
 root_builder.add_node("lottery", route_to_lottery)
@@ -113,16 +121,16 @@ subgraph_registry["root"] = root_graph
 # Main Graph: Top Level
 # ==========================
 class MainGraphState(TypedDict):
-    buy_item: Union[str, None]
+    input: Union[str, None]
 
 
 def invoke_subgraph(state: MainGraphState):
     subgraph = subgraph_registry["root"]
     response = subgraph.invoke(
-         {"buy_item": state['buy_item']}
+         {"buy_item": None, "try_times": 0}
     )
     return  {
-             "buy_item": response.get("buy_item")
+             "input": None
     }
     
 
@@ -138,7 +146,7 @@ main_graph = main_graph.compile()
 # ==========================
 for s in main_graph.stream(
     {
-        "buy_item": None,
+        "input": None,
     }
 ):
     print(s)
