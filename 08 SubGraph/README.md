@@ -1,7 +1,7 @@
 # SubGraph
 
 ## Overview
-```
+```mermaid
 graph LR
     subgraph "Region C: Lottery System"
         subgraph "Region A: Buy Lottery"
