@@ -9,11 +9,9 @@ from langchain_core.output_parsers import StrOutputParser
 # Common state
 # ==========================
 class SharedState(TypedDict):
-    active_subgraph: str
     input: Union[str, None]
-    winnings: Union[str, None]
-    missed: Union[str, None]
     buy_item: Union[str, None]
+
 
 # ==========================
 # Subgraph: Lottery
@@ -43,7 +41,7 @@ def Checking(state: LotteryState):
 
 def checking_result(state: LotteryState) -> Literal["win", "missed"]:
     if state.get("winnings") == "win":
-        print("You win! Go to buy.")
+        print("You win! return to root.")
         return "win"
     else:
         print("You missed. Buy again.")
@@ -89,40 +87,42 @@ subgraph_registry: Dict[str, Any] = {
     "buy": buy_graph,
 }
 
-
 # ==========================
-# Main Graph: Root
+# Subgraph: Root
 # ==========================
 class RootState(TypedDict):
-   active_subgraph: str
-   input: Union[str, None]
-   winnings: Union[str, None]
-   missed: Union[str, None]
-   buy_item: Union[str, None]
-
+    active_subgraph: Union[Literal["lottery", "buy"], None]
+    input: Union[str, None]
+    buy_item: Union[str, None]
 
 def route_to_subgraph(state: RootState):
-    
-    active_subgraph = state['active_subgraph']
+
+    active_subgraph = state.get('active_subgraph')
+
+    if not active_subgraph:
+        return {"active_subgraph": "lottery", "input": None, "buy_item": None}
+
     if active_subgraph not in subgraph_registry:
-        raise ValueError(f"Subgraph {active_subgraph} not found")
+        return {"active_subgraph": None, "input": None, "buy_item": None}
+
 
     subgraph = subgraph_registry[active_subgraph]
     
     if active_subgraph == "lottery":
-        response = subgraph.invoke({"input": state['input'], "winnings": state['winnings'], "missed": state['missed']})
-        
+        response = subgraph.invoke({"input": state['input'], "winnings": None, "missed": None})
         if response.get("winnings") == "win":
-             return {"active_subgraph": "buy", "input": None, "winnings": None, "missed": None, "buy_item": None}
+             return {"active_subgraph": "buy", "input": None,  "buy_item": None}
         else:
-            return {"active_subgraph": "lottery", "input": response['input'], "winnings": response['winnings'], "missed": response['missed'], "buy_item": None}
-            
+             return {"active_subgraph": "lottery", "input": response['input'], "buy_item": None}
+    
     elif active_subgraph == "buy":
         response = subgraph.invoke({"buy_item": state['buy_item']})
-        return {"active_subgraph": None, "input": None, "winnings": None, "missed": None, "buy_item": response['buy_item']}
+        return {"active_subgraph": None, "input": None,  "buy_item": response['buy_item']}
+
     else:
-         return {"active_subgraph": None, "input": None, "winnings": None, "missed": None, "buy_item": None}
-         
+        return {"active_subgraph": None, "input": None, "buy_item": None}
+
+
 def check_subgraph_end(state: RootState) -> Literal["continue", "end"]:
     if state.get("active_subgraph") == None:
         return "end"
@@ -144,35 +144,49 @@ root_graph = root_builder.compile()
 # Main Graph: Top Level
 # ==========================
 class MainGraphState(TypedDict):
-    active_subgraph: str
     input: Union[str, None]
-    winnings: Union[str, None]
-    missed: Union[str, None]
     buy_item: Union[str, None]
 
-
 def main_entry(state: MainGraphState):
-   return {"active_subgraph": "lottery", "input": None, "winnings": None, "missed": None, "buy_item": None}
+    return {"input": None,  "buy_item": None}
+
+
+def invoke_root(state: MainGraphState):
+    response = root_graph.invoke(
+         {"active_subgraph": None, "input": state['input'],  "buy_item": state['buy_item']}
+    )
+
+    return  {
+             "input": response.get("input"),
+             "buy_item": response.get("buy_item")
+    }
+    
+
+def check_main_end(state: MainGraphState) -> Literal["continue", "end"]:
+    if state.get("buy_item") == "ice cream":
+        return "end"
+    else:
+        return "continue"
 
 
 main_builder = StateGraph(MainGraphState)
 main_builder.add_node("main_entry", main_entry)
-main_builder.add_node("root", root_graph)
+main_builder.add_node("root", invoke_root)
 main_builder.set_entry_point("main_entry")
 main_builder.add_edge("main_entry", "root")
+main_builder.add_conditional_edges("root", check_main_end, {
+    "continue": "root",
+    "end": END
+})
 main_graph = main_builder.compile()
-
 
 # ==========================
 # Run
 # ==========================
 for s in main_graph.stream(
     {
-        "active_subgraph": None,
         "input": None,
-        "winnings": None,
-        "missed": None,
-        "buy_item": None
+        "buy_item": None,
     }
 ):
     print(s)
